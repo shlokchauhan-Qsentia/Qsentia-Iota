@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qsentia Strategies - Options Arbitrage Fund</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Light corporate theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg,#ffffff 0%, #f8fafc 100%);
+            color: #0f172a; /* deep slate for text */
+        }
+        /* Custom scrollbar for professionalism */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #48484A; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #1C1C1E; }
+        .data-card {
+            background-color: #ffffff;
+            border: 1px solid rgba(15,23,42,0.06);
+            box-shadow: 0 8px 28px rgba(15,23,42,0.06);
+        }
+        .live-data {
+            font-variant-numeric: tabular-nums; /* Align numbers neatly */
+        }
+        /* Solid Emerald Button for a clean 'Grow' look - Using emerald-500 (#10B981) */
+        .cta-button {
+            background-color: #4f46e5; /* Indigo */
+            color: #ffffff;
+            font-weight: 700;
+            transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease;
+            border-radius: 12px;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(79,70,229,0.12);
+            background-color: #4338ca;
+        }
+
+        /* Theme tokens for consistent styling */
+        :root{
+            --bg-1: #ffffff;
+            --bg-2: #f8fafc;
+            --muted: #64748b;
+            --slate-900: #0f172a;
+            /* Accent colors: purple -> blue gradient */
+            --accent-purple: #7c3aed; /* purple-600 */
+            --accent-blue: #4f46e5;   /* indigo-600 */
+            --accent-600: linear-gradient(180deg, var(--accent-purple), var(--accent-blue));
+            --accent-color: #6d28d9; /* used for single-color fallbacks */
+            --card-shadow: 0 10px 30px rgba(15,23,42,0.06);
+            --card-radius: 12px;
+        }
+
+    /* More professional CTA: purple/blue accent */
+    .cta-button { background: var(--accent-color); color: #fff; }
+    .cta-button:hover { background: #5b21b6; box-shadow: 0 12px 30px rgba(79,70,229,0.10); }
+
+        /* Data cards: unified visual treatment */
+        .data-card { background: var(--bg-1); border-radius: var(--card-radius); box-shadow: var(--card-shadow); border: 1px solid rgba(15,23,42,0.04); }
+        .data-card p.text-gray-300, .data-card p.text-gray-400 { color: var(--muted) !important; }
+    .data-card .text-5xl, .data-card .text-xl.font-extrabold, .data-card .live-data { color: var(--accent-blue) !important; font-weight: 800; }
+        /* Make the numeric KPI bigger and centered */
+        .data-card .text-5xl { font-size: 3.25rem !important; line-height: 1; }
+
+        /* Strategy section: larger professional cards and subtle graphics */
+        section#strategy .data-card { position: relative; padding: 1.5rem; min-height: 260px; border-radius: 14px; box-shadow: 0 12px 30px rgba(15,23,42,0.05); }
+        section#strategy .data-card::before {
+            /* subtle vertical accent near the title (reduced size) */
+            content: '';
+            position: absolute;
+            left: 18px;
+            top: 22px;
+            width: 5px;
+            height: 48px;
+            border-radius: 6px;
+            background: var(--accent-600);
+            opacity: 0.10;
+        }
+        section#strategy .data-card .strategy-icon { background: transparent; color: var(--indigo-600); }
+        section#strategy h3 { font-size: 1.375rem; color: var(--slate-900); }
+        section#strategy p { color: #475569; font-size: 1rem; line-height: 1.6; }
+    section#strategy p strong { color: var(--accent-purple); font-weight: 700; }
+        /* layout: two stacked cards per column */
+        .strategy-grid > .col { display: flex; flex-direction: column; gap: 1.75rem; }
+        @media (min-width: 1024px){
+            .strategy-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* Headings: darker, professional tone */
+        h2 { color: var(--slate-900); font-weight: 800; }
+        h3 { color: var(--slate-900); }
+
+        /* Tables: cleaner, calmer lines */
+        table { background: transparent; }
+        thead tr th { color: var(--muted); border-bottom: 1px solid rgba(15,23,42,0.06); padding-bottom: 0.75rem; }
+        tbody tr td { color: #334155; }
+
+        /* Reduce aggressive highlight colors (max drawdown stays red but softer) */
+        .text-red-400 { color: #ef4444 !important; }
+
+        /* Improve section spacing for presentation */
+        main > section { padding-left: 1.25rem; padding-right: 1.25rem; }
+
+        /* --- ANIMATIONS --- */
+
+        /* 1. Pulse for data change (KPIs and P&L in the table) */
+        @keyframes pulse-change {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(16, 185, 129, 0.2); } /* Subtle Emerald flash */
+            100% { background-color: transparent; }
+        }
+        .animate-change {
+            animation: pulse-change 0.8s ease-out;
+            border-radius: 4px; /* Ensure pulse looks good inside elements */
+        }
+        
+        /* 2. Hover effect for strategy cards (subtle lift) */
+        .animated-card {
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .animated-card:hover {
+            transform: translateY(-4px); /* Lift card */
+            border-color: #10B981; /* Highlight border */
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+        }
+        
+        /* New: Strategy Icon styling from the image for visual cue */
+        .strategy-icon {
+            color: #3B82F6; /* Use a blue color similar to the image's icons, adjusted for the dark theme */
+        }
+        /* --- BACKGROUND CANVAS --- */
+        #bg-canvas {
+            position: fixed;
+            inset: 0; /* top:0; right:0; bottom:0; left:0 */
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* behind the main content (header has z-50) */
+            pointer-events: none; /* allow clicks through the canvas */
+            display: block;
+            will-change: transform; /* hint for smoothness */
+        }
+
+    /* Hero-specific canvas (white-themed grid + moving boxes/lines) */
+    .hero-section { position: relative; overflow: hidden; min-height: 520px; }
+        #hero-canvas {
+            position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+            display: block; mix-blend-mode: normal;
+        }
+
+        /* Make every top-level section roughly full-page height so each "segment" reads as its own page
+           Use 110vh on desktop for a slightly roomy feel, and fall back to 100vh on small screens. */
+        main > section {
+            min-height: 110vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 3.5rem; /* keep existing vertical rhythm */
+            padding-bottom: 3.5rem;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            main > section { min-height: 100vh; padding-top: 2rem; padding-bottom: 2rem; }
+            /* Smaller offset for marquee controls on narrow viewports */
+            .marquee-controls { left: -18px; right: -18px; }
+        }
+    /* Place main content above any canvas artwork */
+    main { position: relative; z-index: 10; }
+    /* Navigation tweaks */
+    .nav-link { color: #475569; font-weight: 600; }
+    .nav-link:hover { color: #4f46e5; }
+    .mobile-menu-backdrop { background: rgba(255,255,255,0.98); box-shadow: 0 6px 20px rgba(15,23,42,0.06); }
+    /* Reveal/type animations for hero text */
+    .reveal { opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    /* Scroll reveal utilities: used to animate sections/cards into view while scrolling */
+    .scroll-reveal { opacity: 0; transform: translateY(18px); transition: opacity 600ms cubic-bezier(.2,.9,.2,1), transform 650ms cubic-bezier(.2,.9,.2,1); will-change: opacity, transform; }
+    .scroll-reveal.in-view { opacity: 1; transform: none; }
+    /* stagger support: children with [data-stagger] will animate with small delay */
+    .scroll-reveal[data-stagger] > * { opacity: 0; transform: translateY(12px); transition: opacity 520ms ease, transform 520ms ease; }
+    .scroll-reveal.in-view[data-stagger] > * { opacity: 1; transform: none; }
+    .scroll-reveal:focus { outline: 3px solid rgba(79,70,229,0.12); }
+    /* Directional fly-in variants (default: translate + fade) */
+    .scroll-reveal.from-left { transform: translateX(-48px); }
+    .scroll-reveal.from-right { transform: translateX(48px); }
+    /* children inherit directional offset when stagger is used (small nudge) */
+    .scroll-reveal[data-stagger].from-left > * { transform: translateX(-28px); }
+    .scroll-reveal[data-stagger].from-right > * { transform: translateX(28px); }
+    /* If you want a pure fly-in (no fade), add the `no-fade` class: keep opacity at 1 and only animate transform */
+    .scroll-reveal.from-left.no-fade, .scroll-reveal.from-right.no-fade { opacity: 1; }
+    .scroll-reveal.from-left.no-fade, .scroll-reveal.from-right.no-fade { transition: transform 650ms cubic-bezier(.2,.9,.2,1); }
+    .scroll-reveal[data-stagger].from-left.no-fade > *, .scroll-reveal[data-stagger].from-right.no-fade > * { opacity: 1; transition: transform 520ms ease; }
+    /* Small numeric styling for animated counters */
+    .count { font-variant-numeric: tabular-nums; display: inline-block; }
+    /* Team marquee (horizontal scrolling left-to-right) */
+    .team-marquee { overflow: hidden; position: relative; }
+    .marquee-track { display: flex; gap: 1.25rem; align-items: center; white-space: nowrap; }
+    .marquee-track .p-6 { flex: 0 0 auto; }
+    .marquee-track > * { display: inline-flex; }
+    /* Team card visual alignment and sizing (center avatar, name, role) */
+    .marquee-track .p-6 {
+        flex: 0 0 auto;
+        width: 220px; /* larger card width */
+        min-width: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.25rem; /* a bit more breathing room */
+        background: transparent; /* keep light background of section */
+        gap: 0.5rem;
+    }
+    .marquee-track .p-6 img {
+        width: 112px;
+        height: 112px;
+        border-radius: 9999px;
+        object-fit: cover;
+        display: block;
+        margin-bottom: 0.5rem;
+        border: 2px solid rgba(15,23,42,0.06);
+        background-color: #f3f4f6;
+    }
+    .marquee-track .p-6 h4,
+    .marquee-track .p-6 h4.text-lg { color: #0f172a !important; margin: 0.25rem 0 0; font-size: 1.05rem; }
+    .marquee-track .p-6 p { color: var(--accent-color) !important; margin: 0.125rem 0 0; font-size: 0.95rem; }
+    /* Prevent role text from overflowing the rounded card: wrap words, allow breaks, and ensure enough line-height */
+    .marquee-track .p-6 p {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        line-height: 1.25 !important;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 0 0.25rem; /* small horizontal padding so long words don't overflow the rounded corners */
+    }
+
+    /* Keep designation horizontal on a single line and truncate with ellipsis instead of wrapping
+       This overrides the more generic p-6 rule above for cards specifically so role lines remain
+       single-line and aligned across the marquee. */
+    .marquee-track .team-card p {
+        white-space: nowrap !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        /* tighten the line spacing so the designation sits closer to the name */
+        line-height: 1;
+        padding: 0 0.25rem; /* slightly tighter horizontal padding */
+    }
+    .marquee-track-wrap { display: flex; align-items: center; }
+     /* marquee control buttons */
+     /* position controls slightly outside the marquee edges and keep them vertically centered
+         keep controls outside the animated wrap (so they are not cloned) by placing them
+         as siblings in a wrapper with overflow visible */
+    .team-marquee-wrapper { position: relative; overflow: visible; }
+    /* nudged further outside: increase negative offset so buttons sit clearly outside the marquee */
+    .marquee-controls { position: absolute; top: 50%; left: -60px; right: -60px; transform: translateY(-50%); pointer-events: none; display: flex; align-items: center; justify-content: space-between; z-index: 3; padding: 0 8px; }
+    .marquee-btn { pointer-events: auto; width: 44px; height: 44px; border-radius: 8px; border: 0; background: rgba(15,23,42,0.06); color: #0f172a; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: background .15s ease, transform .12s ease; }
+    .marquee-btn:hover { background: rgba(15,23,42,0.10); transform: translateY(-2px); }
+    .marquee-btn:active { transform: translateY(0); }
+    /* Team card clickable box style */
+    .team-card { cursor: pointer; background: #ffffff; border: 1px solid rgba(15,23,42,0.04); box-shadow: 0 6px 18px rgba(15,23,42,0.04); transition: transform .18s ease, box-shadow .18s ease; overflow: hidden; }
+    .team-card:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(15,23,42,0.08); }
+
+    /* Modal for individual team card */
+    .team-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 60; background: rgba(2,6,23,0.45); padding: 24px; }
+    .team-modal[aria-hidden="true"] { display: none; }
+    .team-modal .modal-content { background: #fff; border-radius: 12px; max-width: 560px; width: 100%; box-shadow: 0 18px 50px rgba(2,6,23,0.2); overflow: hidden; padding: 22px; }
+    .team-modal .modal-header { display:flex; align-items:center; gap:16px; }
+    .team-modal .modal-avatar { width:96px; height:96px; border-radius:9999px; object-fit:cover; border:2px solid rgba(15,23,42,0.06); background:#f3f4f6; }
+    .team-modal .modal-name { font-size:1.125rem; font-weight:700; color:#0f172a; }
+    .team-modal .modal-role { color:#10B981; margin-top:4px; }
+    .team-modal .modal-close { background: transparent; border: 0; font-size: 24px; line-height:1; cursor:pointer; margin-left:auto; color: #475569; }
+    /* animation moves from -50% -> 0 to create left-to-right motion when duplicated */
+    .marquee-track-wrap { will-change: transform; animation-name: marqueeLR; animation-timing-function: linear; animation-iteration-count: infinite; }
+    @keyframes marqueeLR {
+        0% { transform: translateX(-50%); }
+        100% { transform: translateX(0%); }
+    }
+        /* Header & nav overrides for light theme */
+        header { background: rgba(255,255,255,0.95); border-bottom: 1px solid rgba(15,23,42,0.06); }
+        header .text-2xl { color: #0f172a; }
+        nav a { color: #475569; }
+        nav a:hover { color: #4f46e5; }
+
+        /* Utility overrides to convert dark text utilities used in markup to light theme colors */
+    .text-white { color: #0f172a !important; }
+    .text-gray-300 { color: #64748b !important; }
+    .text-gray-400 { color: #6b7280 !important; }
+    .text-gray-500 { color: #6b7280 !important; }
+
+    /* Contact form: fix dark input backgrounds and improve readability for light theme */
+    form.data-card input,
+    form.data-card textarea {
+        background: var(--bg-1) !important; /* white */
+        color: var(--slate-900) !important;
+        border: 1px solid rgba(15,23,42,0.06) !important;
+        box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+        padding: .75rem 1rem;
+        border-radius: 10px;
+    }
+    form.data-card label { color: #475569 !important; }
+    form.data-card ::placeholder { color: #94a3b8; opacity: 1; }
+    form.data-card input:focus,
+    form.data-card textarea:focus {
+        outline: none;
+        box-shadow: 0 8px 30px rgba(79,70,229,0.12);
+        border-color: var(--accent-color) !important;
+        transform: translateY(-1px);
+    }
+    /* Make the submit button visually match the purple/blue accent and fit the card */
+    form.data-card .cta-button {
+        padding-top: .85rem; padding-bottom: .85rem;
+        border-radius: 10px;
+        background: var(--accent-600);
+        color: #fff;
+        font-weight: 700;
+    }
+    form.data-card .cta-button:hover { box-shadow: 0 12px 30px rgba(79,70,229,0.12); }
+
+    /* Team card contact icons */
+    .contact-icons .icon-btn {
+        width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 10px; background: rgba(255,255,255,0.95); border: 1px solid rgba(15,23,42,0.04); color: var(--slate-900);
+        transition: background .12s ease, transform .12s ease, color .12s ease;
+        box-shadow: 0 6px 14px rgba(2,6,23,0.04);
+    }
+    .contact-icons .icon-btn:hover { background: rgba(79,70,229,0.08); color: var(--accent-color); transform: translateY(-3px); }
+    .team-card { cursor: pointer; }
+
+    /* Normalize team card sizing, avatar and alignment for consistent layout */
+    .marquee-track { display: flex; gap: 1.25rem; align-items: stretch; }
+    .marquee-track .team-card {
+        box-sizing: border-box;
+        width: 260px;            /* increased card width for better visual presence */
+        min-width: 260px;
+        height: 320px;           /* increased height so cards have more breathing room */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* stack items predictably from the top; reserve bottom for icons */
+        position: relative; /* allow absolute positioning of contact icons for pixel-perfect baseline */
+    padding: 1.5rem;        /* slightly larger padding */
+    padding-bottom: 2.6rem; /* a bit less bottom reserve so designation can sit slightly higher */
+        text-align: center;
+        gap: 0.5rem;
+        overflow: hidden;        /* clip any stray overflow */
+    }
+    /* Name heading: reserve a fixed area so all names align across cards */
+    .marquee-track .team-card h4 {
+        margin: 0.25rem 0 0;
+        font-size: 1.06rem;
+        color: #0f172a;
+        min-height: 56px;           /* reserve space for 1-2 lines and keep baseline consistent */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.5rem;          /* avoid text touching edges */
+        text-align: center;
+        line-height: 1.15;
+    }
+    /* Role / designation: keep a small, consistent gap under the name and lock vertical area */
+    .marquee-track .team-card p {
+        margin: 0.06rem 0 0;            /* lift designation slightly closer to the name */
+        font-size: 0.95rem;
+        color: var(--accent-color);
+        min-height: 14px;              /* smaller reserve so text sits higher */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
+    }
+
+    /* (Removed vertical-role special-case — role text now renders horizontally for all cards) */
+
+    /* Desktop: nudge designation a bit higher without overlapping icons */
+    @media (min-width:641px) {
+        /* pulled a bit more higher for better visual grouping with the name */
+        .marquee-track .team-card p { margin-top: -0.75rem; }
+    }
+    /* Avatar normalization (images and initials badge) */
+    .marquee-track .team-card img,
+    .marquee-track .team-card [role="img"] {
+        width: 104px;
+        height: 104px;
+        border-radius: 9999px;
+        object-fit: cover;
+        display: block;
+        margin-bottom: 0.9rem;
+        border: 2px solid rgba(15,23,42,0.06);
+        background-color: #f3f4f6;
+        flex: 0 0 auto;
+    }
+    /* ensure the contact icons sit at the bottom of the card for consistent baseline
+       On desktop we pin them absolutely for pixel-perfect alignment; on small screens
+       we fall back to margin-top:auto so the card can grow naturally. */
+    .marquee-track .team-card .contact-icons { margin-top: auto; }
+    @media (min-width: 641px) {
+        .marquee-track .team-card .contact-icons {
+            position: absolute;
+            left: 0; right: 0;
+            bottom: 1.25rem; /* match card padding-bottom reserve */
+            margin-top: 0;
+            display: flex; justify-content: center; gap: 0.6rem;
+            z-index: 6;
+            pointer-events: auto;
+        }
+        /* make icon buttons visually pop and ensure consistent sizing */
+        .marquee-track .team-card .contact-icons .icon-btn {
+            width: 46px; height: 46px; border-radius: 10px; background: #fff; box-shadow: 0 10px 24px rgba(2,6,23,0.06); border: 1px solid rgba(15,23,42,0.04);
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+
+        /* Use consistent inline SVG icons for both Email and LinkedIn so they align identically in cards and modals. */
+    }
+    /* Lock inner element sizing so headings/roles don't stretch and always align */
+    .marquee-track .team-card h4,
+    .marquee-track .team-card p { flex: 0 0 auto; line-height: 1.2; text-align: center; }
+    /* Reserve consistent vertical space for the contact icons so cards' internal layout is uniform */
+    .marquee-track .team-card .contact-icons {
+        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        min-height: 48px; width: 100%; box-sizing: border-box;
+    }
+    /* Responsive: make cards narrower on small screens and let height grow naturally */
+    @media (max-width: 640px) {
+    .marquee-track .team-card { width: 190px; min-width: 190px; height: auto; padding: 1rem; padding-bottom: 1.2rem; }
+        .marquee-track .team-card img,
+        .marquee-track .team-card [role="img"] { width: 84px; height: 84px; }
+        .marquee-track { gap: 0.9rem; }
+        .marquee-track .team-card p { font-size: 0.88rem; margin-top: -0.25rem; }
+        .marquee-track .team-card .contact-icons { position: static; margin-top: auto; }
+    }
+
+    /* Icon button: make a fixed square so both email and LinkedIn icons align precisely */
+    .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        line-height: 0;
+        vertical-align: middle;
+    }
+    /* Ensure inline SVGs are block-level and sized consistently */
+    .icon-btn svg { display: block; width: 18px; height: 18px; }
+
+    /* Replace only the LinkedIn inline SVGs visually by hiding them and using the data-URL glyph
+       but keep the same sizing/centering so icons match the email glyph exactly. */
+    .icon-btn[aria-label="LinkedIn"] svg { display: none !important; }
+    .icon-btn[aria-label="LinkedIn"]::before {
+        content: "";
+        display: block;
+        width: 18px; height: 18px;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect x='3' y='3' width='18' height='18' rx='2' fill='none' stroke='%230f172a' stroke-width='1.5'/><path d='M8 11.5v5' fill='none' stroke='%230f172a' stroke-width='1.5' stroke-linecap='round'/><circle cx='8' cy='8' r='0.6' fill='%230f172a'/><path d='M12.25 16.5V13c0-1.1.9-2 2-2s2 .9 2 2v3.5' fill='none' stroke='%230f172a' stroke-width='1.5' stroke-linecap='round'/></svg>");
+    }
+
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Animated background canvas (grid + floating shapes) -->
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <a href="#" aria-label="Go to top / landing section" title="Home">
+                        <img src="qsentialogo.png" alt="Qsentia" class="h-10 w-auto cursor-pointer" />
+                    </a>
+                </div>
+                <!-- Tagline removed per request -->
+            </div>
+
+            <!-- Desktop nav -->
+            <nav class="hidden md:flex space-x-6 text-sm font-medium items-center">
+                <!-- Performance nav removed per request -->
+                <a href="#backtesting" class="nav-link transition duration-150">Backtesting</a>
+                <a href="#strategy" class="nav-link transition duration-150">Technology</a>
+                <a href="#team" class="nav-link transition duration-150">Team</a>
+                <a href="#contact" class="ml-2 inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-500 transition duration-150">Investor Login</a>
+            </nav>
+
+            <!-- Mobile: menu toggle -->
+            <div class="md:hidden">
+                <button id="menu-toggle" aria-controls="mobile-menu" aria-expanded="false" class="p-2 rounded-md text-slate-600 hover:text-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+                    <!-- Open icon -->
+                    <svg id="icon-open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                    <!-- Close icon (hidden by default) -->
+                    <svg id="icon-close" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu panel -->
+        <div id="mobile-menu" class="md:hidden hidden mobile-menu-backdrop">
+            <div class="px-4 pt-4 pb-6 space-y-3">
+                <!-- Performance nav removed for mobile menu -->
+                <a href="#backtesting" class="block nav-link py-2">Backtesting</a>
+                <a href="#strategy" class="block nav-link py-2">Technology</a>
+                <a href="#team" class="block nav-link py-2">Team</a>
+                <a href="#contact" class="block mt-2 px-4 py-2 bg-emerald-600 text-white rounded-full text-center">Investor Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section text-center py-20 md:py-32 bg-white border-b border-gray-200">
+            <!-- Hero animation canvas sits behind the hero content -->
+            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+            <div class="max-w-4xl mx-auto px-4 relative" style="z-index:2">
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                    <span class="text-slate-700">Reinforcement Learning</span>
+                    <br class="hidden sm:block"> for Market Perception & Trading
+                </h1>
+                <p class="mt-6 text-xl text-slate-600 max-w-2xl mx-auto">
+                    Qsentia's platform integrates proprietary RL agents with LLMs to uncover high-alpha opportunities and manage risk dynamically.
+                </p>
+                <div class="mt-10">
+                    <a href="#contact" class="cta-button inline-flex items-center justify-center px-8 py-3 border border-transparent text-base rounded-full text-black md:py-4 md:text-lg md:px-10">
+                        Request Private Offering Details
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    
+    <section id="backtesting" class="py-20 bg-gray-50 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center mb-12 text-white">Backtesting Performance Metrics</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                    <div class="data-card p-6 rounded-xl text-center">
+                        <p class="text-5xl font-extrabold text-indigo-400 live-data">2.01</p>
+                        <p class="text-gray-300 font-semibold mt-2">Sharpe Ratio</p>
+                        <p class="text-gray-500 text-xs mt-1">Risk-Adjusted Return</p>
+                    </div>
+                    <div class="data-card p-6 rounded-xl text-center">
+                        <p class="text-5xl font-extrabold text-indigo-400 live-data">2.71</p>
+                        <p class="text-gray-300 font-semibold mt-2">Calmar Ratio</p>
+                        <p class="text-gray-500 text-xs mt-1">Return vs Max DD</p>
+                    </div>
+                    <div class="data-card p-6 rounded-xl text-center">
+                        <p class="text-5xl font-extrabold text-indigo-400 live-data">3.77</p>
+                        <p class="text-gray-300 font-semibold mt-2">Sortino Ratio</p>
+                        <p class="text-gray-500 text-xs mt-1">Downside Deviation</p>
+                    </div>
+                    <div class="data-card p-6 rounded-xl text-center">
+                        <p class="text-5xl font-extrabold text-red-400 live-data">7.77%</p>
+                        <p class="text-gray-300 font-semibold mt-2">Maximum Drawdown</p>
+                        <p class="text-gray-500 text-xs mt-1">Peak to Trough</p>
+                    </div>
+                </div>
+                
+                <div class="max-w-4xl mx-auto text-center mt-12">
+                    <h3 class="text-xl font-bold text-white mb-4">Strategy Performance Summary</h3>
+                    <p class="text-gray-300">
+                        Our AI-driven quantitative strategy has consistently outperformed traditional benchmarks across multiple market cycles. The combination of reinforcement learning and natural language processing enables superior risk-adjusted returns while maintaining disciplined drawdown control and consistent alpha generation.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    <section id="strategy" class="py-20 bg-white border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center mb-12 text-emerald-500">Intelligent Portfolio Management</h2>
+                
+                <div class="grid strategy-grid gap-8 md:grid-cols-2">
+                    <div class="col" data-stagger="90">
+                        <div class="data-card p-6 rounded-xl animated-card scroll-reveal from-left">
+                            <div class="mb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 strategy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l5.59-5.59L18 10l-7 7z"/>
+                                </svg>
+                                <h3 class="text-xl font-bold">Advanced AI Models</h3>
+                            </div>
+                            <p>
+                                Our proprietary framework combines <strong>deep reinforcement learning</strong> with <strong>large language models</strong> to identify hidden alpha signals and optimize portfolio allocation in real-time.
+                            </p>
+                        </div>
+
+                        <div class="data-card p-6 rounded-xl animated-card scroll-reveal from-left">
+                            <div class="mb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 strategy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2L4 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l5.59-5.59L18 10l-7 7z"/>
+                                </svg>
+                                <h3 class="text-xl font-bold">Dynamic Risk Management</h3>
+                            </div>
+                            <p>
+                                <strong>Multi-modal data interpretation</strong> enables rapid adaptation to market volatility while maintaining rigorous risk parameters and delivering superior risk-adjusted returns.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col" data-stagger="90">
+                        <div class="data-card p-6 rounded-xl animated-card scroll-reveal from-right">
+                            <div class="mb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 strategy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z"/>
+                                </svg>
+                                <h3 class="text-xl font-bold">Systematic Alpha Generation</h3>
+                            </div>
+                            <p>
+                                Continuous market signal processing through <strong>natural language understanding</strong> and <strong>quantitative factor analysis</strong> to identify persistent, uncorrelated return streams across multiple asset classes.
+                            </p>
+                        </div>
+
+                        <div class="data-card p-6 rounded-xl animated-card scroll-reveal from-right">
+                            <div class="mb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 strategy-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 8c0-2.21-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4 4-1.79 4-4zm-4 5c-3.31 0-6 2.69-6 6h12c0-3.31-2.69-6-6-6z"/>
+                                </svg>
+                                <h3 class="text-xl font-bold">Real-Time Portfolio Optimization</h3>
+                            </div>
+                            <p>
+                                <strong>Adaptive position sizing</strong> and <strong>rebalancing algorithms</strong> that respond to changing market conditions while maintaining target risk profiles and liquidity requirements.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    <section id="team" class="py-20 bg-gray-50 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold mb-4 text-white">Qsentia Team</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto mb-12">
+                    Our team blends deep expertise in quantitative finance, machine learning, and high-performance trading systems.
+                </p>
+                <div class="team-marquee-wrapper">
+                    <div class="team-marquee" aria-label="Qsentia team marquee">
+                        <div class="marquee-track-wrap" style="--marquee-duration: 30s;">
+                            <div class="marquee-track">
+                            <!-- Updated team members list from provided names; designation kept as 'Qsentia Team' -->
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Lucas.png" alt="Lucas Zarzeczny">
+                                <h4 class="text-lg font-semibold text-white">Lucas Zarzeczny</h4>
+                                <p class="text-emerald-500 text-sm">CEO</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Karandeep Sonewane.png" alt="Karandeep Sonewane">
+                                <h4 class="text-lg font-semibold text-white">Karandeep Sonewane</h4>
+                                <p class="text-emerald-500 text-sm">Sr. Quantitative Developer</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Richard Nemeth.png" alt="Richard Nemeth">
+                                <h4 class="text-lg font-semibold text-white">Richard Nemeth</h4>
+                                <p class="text-emerald-500 text-sm">Senior Quant Researcher</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Abhinav Keswani.png" alt="Abhinav Keswani">
+                                <h4 class="text-lg font-semibold text-white">Abhinav Keswani</h4>
+                                <p class="text-emerald-500 text-sm">Qsentia Team</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Bob Habig.png" alt="Bob Habig">
+                                <h4 class="text-lg font-semibold text-white">Bob Habig</h4>
+                                    <p class="text-emerald-500 text-sm">Head-Software Development</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Shuxian Mei.png" alt="Shuxian Mei">
+                                <h4 class="text-lg font-semibold text-white">Shuxian Mei</h4>
+                                <p class="text-emerald-500 text-sm">Qsentia Team</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Aditi.png" alt="Aditi">
+                                <h4 class="text-lg font-semibold text-white">Aditi</h4>
+                                <p class="text-emerald-500 text-sm">Head-Investor Relations</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Jacob Weiss.png" alt="Jacob Weiss">
+                                <h4 class="text-lg font-semibold text-white">Jacob Weiss</h4>
+                                <p class="text-emerald-500 text-sm">CTO</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Aous Abdo.png" alt="Aous Abdo">
+                                <h4 class="text-lg font-semibold text-white">Aous Abdo</h4>
+                                <p class="text-emerald-500 text-sm">Chief Data Officer</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <!-- Use same avatar sizing & spacing as image avatars so alignment matches other cards -->
+                                <div role="img" aria-label="Serge Levin initials" class="mx-auto mb-3 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-weight:700;font-size:1.05rem;box-shadow:0 6px 18px rgba(15,23,42,0.04);border:2px solid rgba(15,23,42,0.06);">SL</div>
+                                <h4 class="text-lg font-semibold text-white">Serge Levin</h4>
+                                <p class="text-emerald-500 text-sm">Quantitative Researcher</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Harsha Pothapragada.png" alt="Harsha Pothapragada">
+                                <h4 class="text-lg font-semibold text-white">Harsha Pothapragada</h4>
+                                <p class="text-emerald-500 text-sm">Senior LLM Engineer</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Aman.png" alt="Aman">
+                                <h4 class="text-lg font-semibold text-white">Aman</h4>
+                                <p class="text-emerald-500 text-sm">Quantitative Researcher</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3A2 2 0 0121 5v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.5 17V10H6v7h2.5zM7.25 8.75a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zM18 17v-3.5c0-2-1-2.75-2.25-2.75-1.05 0-1.5.7-1.75 1.2V17h2.5v-3.25c0-.9.5-1.25 1.05-1.25.6 0 1.2.35 1.2 1.3V17H18z"/></svg></a>
+                                </div>
+                            </div>
+
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="Tanvi Johri.png" alt="Tanvi Johri">
+                                <h4 class="text-lg font-semibold text-white">Tanvi Johri</h4>
+                                <p class="text-emerald-500 text-sm">Intern</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3A2 2 0 0121 5v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.5 17V10H6v7h2.5zM7.25 8.75a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zM18 17v-3.5c0-2-1-2.75-2.25-2.75-1.05 0-1.5.7-1.75 1.2V17h2.5v-3.25c0-.9.5-1.25 1.05-1.25.6 0 1.2.35 1.2 1.3V17H18z"/></svg></a>
+                                </div>
+                            </div>
+                            
+                            <!-- Shlok Chauhan (added) -->
+                            <div class="p-6 rounded-xl text-center team-card" data-email="" data-linkedin="">
+                                <img class="w-20 h-20 mx-auto rounded-full object-cover mb-3" src="shlok chauhan.png" alt="Shlok Chauhan">
+                                <h4 class="text-lg font-semibold text-white">Shlok Chauhan</h4>
+                                <p class="text-emerald-500 text-sm">Software Development Intern</p>
+                                <div class="contact-icons mt-3 flex items-center justify-center gap-3">
+                                    <a href="#" class="icon-btn" title="Email" aria-label="Email"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg></a>
+                                    <a href="#" class="icon-btn" title="LinkedIn" aria-label="LinkedIn"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.34 17.5H6.16V10.5h2.18v7zM7.25 9.5c-.7 0-1.25-.57-1.25-1.25S6.55 7 7.25 7s1.25.57 1.25 1.25S7.95 9.5 7.25 9.5zM18.34 17.5h-2.18v-3.54c0-.84-.03-1.92-1.17-1.92-1.17 0-1.35.91-1.35 1.85v3.62h-2.17V10.5h2.09v1.02h.03c.29-.55 1-1.13 2.06-1.13 2.2 0 2.61 1.45 2.61 3.33v4.78z"/></svg></a>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- controls: left / right manual scroll (kept outside the overflow:hidden marquee so they are visible) -->
+                    <div class="marquee-controls" aria-hidden="true">
+                        <button class="marquee-btn marquee-left" aria-label="Scroll left">‹</button>
+                        <button class="marquee-btn marquee-right" aria-label="Scroll right">›</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </section>
+
+    <section id="contact" class="py-20 bg-white border-t border-gray-200">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold mb-4 text-white">Contact Our Investor Relations</h2>
+                <p class="text-gray-300 mb-8">
+                    Qsentia serves qualified investors. Please contact us to schedule a confidential discussion.
+                </p>
+                
+                <form class="space-y-4 data-card p-6 rounded-xl text-left">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-300">Full Name</label>
+                        <input type="text" id="name" required class="mt-1 block w-full bg-[#1C1C1E] border border-[#48484A] rounded-lg shadow-sm p-3 text-white focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
+                        <input type="email" id="email" required class="mt-1 block w-full bg-[#1C1C1E] border border-[#48484A] rounded-lg shadow-sm p-3 text-white focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-300">Message</label>
+                        <textarea id="message" rows="4" required class="mt-1 block w-full bg-[#1C1C1E] border border-[#48484A] rounded-lg shadow-sm p-3 text-white focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                    </div>
+                    <button type="submit" class="cta-button w-full py-3 mt-4 text-lg rounded-xl">
+                        Submit Inquiry
+                    </button>
+                    <div id="contact-message" class="mt-4 text-center text-green-400 hidden"></div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-500 text-xs">
+            &copy; 2025 Qsentia LP. All rights reserved. Trading in options involves risk and is not suitable for all investors. Past performance is not indicative of future results. This site is for informational purposes only.
+        </div>
+    </footer>
+
+
+    <script>
+        /* Background animation: subtle grid + floating shapes for visual interest
+           - Renders to #bg-canvas (inserted in the document). Uses requestAnimationFrame.
+           - Resizes with devicePixelRatio for crisp rendering and pauses when the tab is hidden.
+        */
+        (function(){
+            const canvas = document.getElementById('bg-canvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let dpr = window.devicePixelRatio || 1;
+            let vw = window.innerWidth;
+            let vh = window.innerHeight;
+
+            function resizeCanvas(){
+                dpr = window.devicePixelRatio || 1;
+                vw = window.innerWidth;
+                vh = window.innerHeight;
+                canvas.width = Math.max(1, Math.floor(vw * dpr));
+                canvas.height = Math.max(1, Math.floor(vh * dpr));
+                canvas.style.width = vw + 'px';
+                canvas.style.height = vh + 'px';
+                // Use transform to draw in CSS-pixel coordinates while backing buffer is DPR-scaled
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            // Utility
+            const rand = (a,b) => Math.random()*(b-a)+a;
+
+            // Grid spacing and shapes array
+            const GRID_SPACING = Math.max(48, Math.round(Math.min(vw, vh) / 12));
+            let shapes = [];
+
+            function makeShape(){
+                const types = ['dot','outline-square','filled-square','line'];
+                const type = types[Math.floor(Math.random()*types.length)];
+                const size = rand(8, 28);
+                return {
+                    type,
+                    x: rand(-50, vw + 50),
+                    y: rand(-50, vh + 50),
+                    vx: rand(-0.12, 0.12),
+                    vy: rand(-0.12, 0.12),
+                    size,
+                    rotation: rand(0, Math.PI*2),
+                    spin: rand(-0.01, 0.01),
+                    alpha: rand(0.08, 0.28),
+                    // slate tones so shapes remain visible on the white/light background
+                    stroke: `rgba(15,23,42,${rand(0.06,0.18)})`
+                };
+            }
+
+            function rebuildShapes(){
+                const area = vw * vh;
+                const desired = Math.max(12, Math.round(area / 90000));
+                shapes = [];
+                for(let i=0;i<desired;i++) shapes.push(makeShape());
+            }
+
+            let last = performance.now();
+            let paused = false;
+            document.addEventListener('visibilitychange', ()=>{ paused = document.hidden; });
+
+            function drawGrid(){
+                ctx.save();
+                ctx.lineWidth = 1;
+                // darker slate grid for the light/white theme
+                ctx.strokeStyle = 'rgba(15,23,42,0.06)';
+                // vertical lines
+                for(let x=0;x<=vw;x+=GRID_SPACING){
+                    ctx.beginPath();
+                    ctx.moveTo(x + 0.5, 0);
+                    ctx.lineTo(x + 0.5, vh);
+                    ctx.stroke();
+                }
+                // horizontal lines
+                for(let y=0;y<=vh;y+=GRID_SPACING){
+                    ctx.beginPath();
+                    ctx.moveTo(0, y + 0.5);
+                    ctx.lineTo(vw, y + 0.5);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            function drawShapes(dt){
+                for(const s of shapes){
+                    s.x += s.vx * dt;
+                    s.y += s.vy * dt;
+                    s.rotation += s.spin * dt;
+
+                    // wrap around
+                    if(s.x < -60) s.x = vw + 60;
+                    if(s.x > vw + 60) s.x = -60;
+                    if(s.y < -60) s.y = vh + 60;
+                    if(s.y > vh + 60) s.y = -60;
+
+                    ctx.save();
+                    ctx.translate(s.x, s.y);
+                    ctx.rotate(s.rotation);
+                    ctx.globalAlpha = s.alpha;
+                    ctx.strokeStyle = s.stroke;
+                    ctx.fillStyle = s.stroke;
+                    if(s.type === 'dot'){
+                        ctx.beginPath();
+                        ctx.arc(0,0, Math.max(1, s.size/6), 0, Math.PI*2);
+                        ctx.fill();
+                    } else if(s.type === 'outline-square'){
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(-s.size/2, -s.size/2, s.size, s.size);
+                    } else if(s.type === 'filled-square'){
+                        ctx.fillRect(-s.size/2, -s.size/2, s.size, s.size);
+                    } else if(s.type === 'line'){
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(-s.size*1.6, 0);
+                        ctx.lineTo(s.size*1.6, 0);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+
+                // subtle diagonal accent line (like in the image)
+                ctx.save();
+                ctx.globalAlpha = 0.05;
+                // subtle slate accent instead of white (matches site text color)
+                ctx.strokeStyle = 'rgba(15,23,42,0.06)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(vw * 0.15, vh * 0.75);
+                ctx.lineTo(vw * 0.6, vh * 0.3);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function frame(now){
+                if(paused){ last = now; requestAnimationFrame(frame); return; }
+                const elapsed = Math.min(40, now - last); // clamp
+                last = now;
+                const dt = elapsed; // dt in ms
+                ctx.clearRect(0,0, vw, vh);
+                drawGrid();
+                drawShapes(dt);
+                requestAnimationFrame(frame);
+            }
+
+            // init
+            function init(){
+                resizeCanvas();
+                rebuildShapes();
+                requestAnimationFrame(frame);
+            }
+
+            window.addEventListener('resize', ()=>{
+                resizeCanvas();
+                rebuildShapes();
+            });
+
+            init();
+        })();
+        
+        /* Hero canvas animation: white grid with boxes and diagonal lines moving left-to-right */
+        (function(){
+            const canvas = document.getElementById('hero-canvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let dpr = window.devicePixelRatio || 1;
+            let vw = canvas.clientWidth || window.innerWidth;
+            let vh = canvas.clientHeight || 600;
+
+            function resize(){
+                dpr = window.devicePixelRatio || 1;
+                // Use the hero parent size (more reliable across browsers)
+                const parent = canvas.parentElement || document.body;
+                const rect = parent.getBoundingClientRect();
+                vw = Math.max(1, rect.width || window.innerWidth);
+                vh = Math.max(1, rect.height || Math.max(420, window.innerHeight * 0.45));
+                canvas.width = Math.max(1, Math.floor(vw * dpr));
+                canvas.height = Math.max(1, Math.floor(vh * dpr));
+                canvas.style.width = vw + 'px';
+                canvas.style.height = vh + 'px';
+                ctx.setTransform(dpr,0,0,dpr,0,0);
+            }
+
+            // shapes that move left-to-right
+            const shapes = [];
+            const GRID_SPACING = 56;
+
+            function addShape(){
+                const y = Math.random() * vh * 0.8 + vh*0.1;
+                const size = 12 + Math.random()*28;
+                shapes.push({
+                    x: -60 - Math.random()*200,
+                    y,
+                    vx: 0.2 + Math.random()*0.5,
+                    size,
+                    type: Math.random() > 0.6 ? 'square' : 'dot',
+                    alpha: 0.35 + Math.random()*0.45
+                });
+            }
+
+            // prepopulate
+            function populate(){
+                shapes.length = 0;
+                const desired = Math.max(8, Math.round((vw*vh)/120000));
+                for(let i=0;i<desired;i++) addShape();
+            }
+
+            let last = performance.now();
+            let paused = false;
+            document.addEventListener('visibilitychange', ()=>{ paused = document.hidden; });
+
+            function drawGrid(){
+                ctx.save();
+                ctx.clearRect(0,0,vw,vh);
+                ctx.lineWidth = 1;
+                // stronger, darker grid for better contrast on white hero
+                ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+                for(let x=0;x<=vw;x+=GRID_SPACING){
+                    ctx.beginPath(); ctx.moveTo(x+0.5,0); ctx.lineTo(x+0.5,vh); ctx.stroke();
+                }
+                for(let y=0;y<=vh;y+=GRID_SPACING){
+                    ctx.beginPath(); ctx.moveTo(0,y+0.5); ctx.lineTo(vw,y+0.5); ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            function drawShapes(dt){
+                for(const s of shapes){
+                    s.x += s.vx * dt * 0.06; // tuned speed
+                    if(s.x > vw + 80) s.x = -80 - Math.random()*200; // wrap
+
+                    ctx.save();
+                    ctx.globalAlpha = s.alpha;
+                    // darker shapes so they show on the light hero background
+                    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+                    ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+                    if(s.type === 'dot'){
+                        ctx.beginPath(); ctx.arc(s.x, s.y, Math.max(1, s.size/8), 0, Math.PI*2); ctx.fill();
+                    } else {
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(s.x - s.size/2, s.y - s.size/2, s.size, s.size);
+                    }
+                    ctx.restore();
+                }
+
+                // horizontal accent lines moving left-to-right (stock/chart-inspired)
+                ctx.save();
+                ctx.globalAlpha = 0.26; // visible
+                ctx.strokeStyle = 'rgba(0,0,0,0.32)';
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([6,8]);
+
+                // Time-based translation for smooth left-to-right motion
+                const seconds = performance.now() / 1000;
+                const speed = 0.12; // proportion of viewport per second (higher for clearer motion)
+                const translation = (seconds * speed * vw) % (GRID_SPACING * 12);
+
+                // Draw a few horizontal lines across the hero with slight wave jitter to suggest market movement
+                const linesCount = 4;
+                for (let i = 0; i < linesCount; i++) {
+                    const baseY = vh * (0.28 + i * 0.14); // distributed vertically
+                    const phase = seconds * (0.8 + i * 0.2);
+                    const xStart = -GRID_SPACING * 12 + translation + i * 24;
+
+                    ctx.beginPath();
+                    // create a polyline from left to right with small sine jitter
+                    const step = 24;
+                    for (let x = xStart; x <= vw + 120; x += step) {
+                        const t = (x / vw) * Math.PI * 2;
+                        const jitter = Math.sin(t * (1.2 + i * 0.15) + phase) * (6 + i * 2);
+                        const y = baseY + jitter;
+                        if (x === xStart) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+
+                // reset dash and restore
+                ctx.setLineDash([]);
+                ctx.restore();
+            }
+
+            function frame(now){
+                if(paused){ last = now; requestAnimationFrame(frame); return; }
+                const elapsed = Math.min(40, now - last);
+                last = now;
+                const dt = elapsed;
+                drawGrid();
+                drawShapes(dt);
+                requestAnimationFrame(frame);
+            }
+
+            // init
+            function initHero(){
+                try{
+                    resize();
+                    populate();
+                    requestAnimationFrame(frame);
+                }catch(e){
+                    // swallow errors and attempt again shortly
+                    setTimeout(()=>{ try{ resize(); populate(); requestAnimationFrame(frame); }catch(e2){} }, 120);
+                }
+            }
+
+            window.addEventListener('resize', ()=>{ resize(); populate(); });
+            // Initialize after DOM ready and window load for reliability in Chrome/editor previews
+            if(document.readyState === 'complete' || document.readyState === 'interactive'){
+                initHero();
+            } else {
+                document.addEventListener('DOMContentLoaded', initHero);
+                window.addEventListener('load', initHero);
+            }
+        })();
+        // Helper function to apply and remove the animation class
+        const animateChange = (element) => {
+            // Check if the element has content before trying to animate
+            if (!element.textContent.trim()) return;
+
+            element.classList.remove('animate-change');
+            // Force reflow/repaint to restart the animation
+            void element.offsetWidth; 
+            element.classList.add('animate-change');
+            
+            // Remove the class after the animation duration (800ms)
+            setTimeout(() => {
+                element.classList.remove('animate-change');
+            }, 800); 
+        };
+
+        // Helper function to format numbers with color
+        const formatPnl = (value) => {
+            // Note: We are returning the inner HTML span here, which is fine for rendering.
+            const color = value >= 0 ? 'text-green-400' : 'text-red-400';
+            return `<span class="${color}">${value.toFixed(2)}%</span>`;
+        };
+
+        const formatGreek = (value) => {
+            return value.toFixed(2);
+        };
+
+        let trades = [
+            { symbol: 'SPY', strategy: 'RL Hedged Condor', exp: '11/30/2025', delta: 0.15, theta: 0.05, vega: -0.02, pnl: 2.34 },
+            { symbol: 'QQQ', strategy: 'LLM Call Spread', exp: '12/15/2025', delta: 0.85, theta: 0.10, vega: 0.01, pnl: 0.91 },
+            { symbol: 'TSLA', strategy: 'GAN Straddle', exp: '01/17/2026', delta: 0.00, theta: -0.15, vega: 0.05, pnl: -1.05 },
+            { symbol: 'GOOGL', strategy: 'RL Bear Spread', exp: '11/22/2025', delta: -0.45, theta: 0.08, vega: -0.01, pnl: 5.21 },
+        ];
+
+
+        // Function to render the table rows. Pass the previous P&L values to determine if animation is needed.
+        const renderTrades = (oldTrades = []) => {
+            const liveTradesBody = document.getElementById('live-trades-body');
+            if(!liveTradesBody) return; // nothing to render if the performance table was removed
+            liveTradesBody.innerHTML = '';
+            
+            trades.forEach((trade, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-[#48484A] transition duration-150'; 
+                
+                // Construct the row HTML, including a class to target the P&L cell later
+                row.innerHTML = `
+                    <td class="py-3 font-semibold text-white">${trade.symbol}</td>
+                    <td class="py-3 text-gray-300">${trade.strategy}</td>
+                    <td class="py-3 text-right text-gray-300">${trade.exp}</td>
+                    <td class="py-3 text-right live-data">${formatGreek(trade.delta)}</td>
+                    <td class="py-3 text-right live-data">${formatGreek(trade.theta)}</td>
+                    <td class="py-3 text-right live-data">${formatGreek(trade.vega)}</td>
+                    <td class="py-3 text-right live-data font-bold pnl-cell">${formatPnl(trade.pnl)}</td>
+                `;
+                liveTradesBody.appendChild(row);
+
+                // Animation Logic for P&L
+                const oldTrade = oldTrades[index];
+                if (oldTrade && oldTrade.pnl.toFixed(2) !== trade.pnl.toFixed(2)) {
+                    const pnlCell = row.querySelector('.pnl-cell');
+                    if (pnlCell) {
+                         // We need to target the span inside the TD for the pulse effect, 
+                         // but animating the TD background looks better.
+                        animateChange(pnlCell);
+                    }
+                }
+            });
+        };
+
+        // Function to simulate dynamic updates and trigger animations
+        const updateTradeData = () => {
+            const oldTrades = JSON.parse(JSON.stringify(trades)); // Deep copy to compare old vs. new P&L
+
+            // 1. Update live trades data
+            trades.forEach(trade => {
+                const change = (Math.random() * 0.2) - 0.1; // -0.1% to +0.1%
+                trade.pnl += change;
+                
+                // Small random fluctuation for Greeks
+                trade.delta += (Math.random() * 0.02) - 0.01;
+                trade.theta += (Math.random() * 0.01) - 0.005;
+                trade.vega += (Math.random() * 0.005) - 0.0025;
+                
+                // Keep Greeks realistic
+                trade.delta = Math.min(1, Math.max(-1, trade.delta));
+            });
+
+            // 2. Update Fund KPIs
+            // Update Fund KPIs if present on the page (guard against removed performance section)
+            const ytdReturnElement = document.getElementById('ytd-return');
+            if(ytdReturnElement){
+                const oldYtdValue = ytdReturnElement.innerText;
+                let ytdValue = parseFloat(oldYtdValue.replace('+', '').replace('%', '')) || 0;
+                ytdValue += (Math.random() * 0.01) - 0.005;
+                const newYtdText = `+${ytdValue.toFixed(1)}%`;
+                if (newYtdText !== oldYtdValue) {
+                    ytdReturnElement.innerText = newYtdText;
+                    // Update class based on return value
+                    ytdReturnElement.className = ytdValue >= 15 ? 'text-xl md:text-3xl font-bold text-green-400 mt-1 live-data' : 'text-xl md:text-3xl font-bold text-yellow-400 mt-1 live-data';
+                    animateChange(ytdReturnElement);
+                }
+            }
+
+            const sharpeRatioElement = document.getElementById('sharpe-ratio');
+            if(sharpeRatioElement){
+                const oldSharpeValue = sharpeRatioElement.innerText || '0';
+                let sharpeValue = parseFloat(oldSharpeValue) || 0;
+                sharpeValue += (Math.random() * 0.005) - 0.0025;
+                const newSharpeText = sharpeValue.toFixed(2);
+                if (newSharpeText !== oldSharpeValue) {
+                    sharpeRatioElement.innerText = newSharpeText;
+                    animateChange(sharpeRatioElement);
+                }
+            }
+
+            const sentimentElement = document.getElementById('skew-index');
+            if(sentimentElement){
+                const oldSentimentValue = sentimentElement.innerText || '60% Bullish';
+                let sentimentValue = parseInt(oldSentimentValue.replace('% Bullish', '')) || 60;
+                sentimentValue += Math.floor((Math.random() * 5) - 2);
+                sentimentValue = Math.min(95, Math.max(55, sentimentValue));
+                const newSentimentText = `${sentimentValue}% Bullish`;
+                if (newSentimentText !== oldSentimentValue) {
+                    sentimentElement.innerText = newSentimentText;
+                    animateChange(sentimentElement);
+                }
+            }
+
+            // 3. Rerender table and pass old trades for P&L animation
+            renderTrades(oldTrades);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial render
+            renderTrades();
+
+            // Set up interval for live updates (every 2 seconds)
+            setInterval(updateTradeData, 2000);
+
+            // Contact form submission simulation (no actual backend)
+            const contactForm = document.querySelector('form');
+            if(contactForm){
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const messageEl = document.getElementById('contact-message');
+                    if(messageEl){
+                        messageEl.textContent = 'Thank you for your inquiry. An Investor Relations member will contact you shortly.';
+                        messageEl.classList.remove('hidden');
+                    }
+                    contactForm.reset();
+                    
+                    // Hide the message after a few seconds
+                    setTimeout(() => {
+                        if(messageEl) messageEl.classList.add('hidden');
+                    }, 5000);
+                });
+            }
+
+            // Team card click -> modal (pause marquee while modal is open)
+            try{
+                const marqueeWrap = document.querySelector('.marquee-track-wrap');
+                const teamCards = document.querySelectorAll('.marquee-track .team-card');
+                if(teamCards && teamCards.length){
+                    const mailSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2z"/></svg>';
+                    const linkedinSvg = '<svg xmlns="https://www.svgrepo.com/show/93637/linkedin-logo.svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="3"/><circle cx="6.5" cy="8.5" r="1"/><path d="M6.5 11.5v5.5"/><path d="M10.5 11.5v5.5"/><path d="M10.5 8.5c0-1.1.9-2 2-2s2 .9 2 2v0"/></svg>';
+
+                    function openTeamModal(card){
+                        const name = card.querySelector('h4')?.innerText || '';
+                        const role = card.querySelector('p')?.innerText || '';
+                        const avatar = card.querySelector('img')?.src || '';
+                        const email = card.dataset.email || '';
+                        const linkedin = card.dataset.linkedin || '';
+
+                        // pause marquee
+                        if(marqueeWrap) marqueeWrap.style.animationPlayState = 'paused';
+
+                        const modal = document.createElement('div');
+                        modal.className = 'team-modal';
+                        modal.setAttribute('role','dialog');
+                        modal.setAttribute('aria-modal','true');
+                        modal.innerHTML = `
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <img class="modal-avatar" src="${avatar}" alt="${name}">
+                                    <div>
+                                        <div class="modal-name">${name}</div>
+                                        <div class="modal-role">${role}</div>
+                                        <div class="mt-3 flex gap-3">
+                                            <a class="icon-btn" href="${email ? 'mailto:'+email : '#'}" aria-label="Email">${mailSvg}</a>
+                                            <a class="icon-btn" href="${linkedin || '#'}" aria-label="LinkedIn">${linkedinSvg}</a>
+                                        </div>
+                                    </div>
+                                    <button class="modal-close" aria-label="Close">&times;</button>
+                                </div>
+                                <div class="modal-body mt-4 text-sm text-gray-600">Qsentia team member.</div>
+                            </div>
+                        `;
+
+                        // append and focus
+                        document.body.appendChild(modal);
+                        const closeBtn = modal.querySelector('.modal-close');
+
+                        function closeModal(){
+                            try{ modal.remove(); }catch(e){}
+                            if(marqueeWrap) marqueeWrap.style.animationPlayState = 'running';
+                            document.removeEventListener('keydown', onKey);
+                        }
+                        function onKey(e){ if(e.key === 'Escape') closeModal(); }
+
+                        // backdrop click closes
+                        modal.addEventListener('click', (ev)=>{ if(ev.target === modal) closeModal(); });
+                        if(closeBtn) closeBtn.addEventListener('click', closeModal);
+                        document.addEventListener('keydown', onKey);
+                    }
+
+                    teamCards.forEach(card => {
+                        // ensure clicking icons doesn't open modal
+                        card.querySelectorAll('.contact-icons a').forEach(a=>{
+                            a.addEventListener('click', (ev)=>{ ev.stopPropagation(); /* allow default for now */ });
+                        });
+                        card.addEventListener('click', ()=> openTeamModal(card));
+                    });
+                }
+            }catch(e){ /* non-critical */ }
+        });
+
+        // Small UI animations: reveal hero text and count-up KPIs
+        (function(){
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            // Generic animator for numeric values
+            function animateValue(el, start, end, duration, formatter){
+                if(!el) return;
+                if(prefersReduced){ el.innerText = formatter(end); return; }
+                const startTime = performance.now();
+                function frame(now){
+                    const t = Math.min(1, (now - startTime)/duration);
+                    // easeOutQuad
+                    const eased = 1 - (1 - t) * (1 - t);
+                    const val = start + (end - start) * eased;
+                    el.innerText = formatter(val);
+                    if(t < 1) requestAnimationFrame(frame);
+                    else el.innerText = formatter(end);
+                }
+                requestAnimationFrame(frame);
+            }
+
+            // Helpers for formatting
+            const fmtAum = v => '$' + Math.round(v).toLocaleString() + 'M';
+            const fmtPct1 = v => (v>=0?'+':'') + v.toFixed(1) + '%';
+            const fmtFloat2 = v => v.toFixed(2);
+            const fmtPctBull = v => Math.round(v) + '% Bullish';
+
+            // Find elements and parse targets
+            const aumEl = document.getElementById('aum-value');
+            const ytdEl = document.getElementById('ytd-return');
+            const sharpeEl = document.getElementById('sharpe-ratio');
+            const skewEl = document.getElementById('skew-index');
+
+                try{
+                    // Enable slow count-up animation for KPI cards on initial load (respects prefers-reduced-motion)
+                    if(aumEl){
+                            const raw = aumEl.innerText.replace(/[^0-9.]/g,'');
+                            const target = parseFloat(raw) || 0;
+                            aumEl.classList.add('count','count-observe');
+                            aumEl.dataset.target = String(target);
+                            // store a preferred duration (ms)
+                            aumEl.dataset.duration = '4000';
+                            if(prefersReduced){
+                                aumEl.innerText = fmtAum(target);
+                            } else {
+                                // show starting value (0) until scrolled into view
+                                aumEl.innerText = fmtAum(0);
+                            }
+                        }
+
+                        if(ytdEl){
+                            const raw = ytdEl.innerText.replace(/[+%]/g,'');
+                            const target = parseFloat(raw) || 0;
+                            ytdEl.classList.add('count','count-observe');
+                            ytdEl.dataset.target = String(target);
+                            ytdEl.dataset.duration = '3500';
+                            if(prefersReduced){
+                                ytdEl.innerText = fmtPct1(target);
+                            } else {
+                                ytdEl.innerText = fmtPct1(0);
+                            }
+                        }
+
+                        if(sharpeEl){
+                            const raw = sharpeEl.innerText.replace(/[^0-9.\-]/g,'');
+                            const target = parseFloat(raw) || 0;
+                            sharpeEl.classList.add('count','count-observe');
+                            sharpeEl.dataset.target = String(target);
+                            sharpeEl.dataset.duration = '3000';
+                            if(prefersReduced){
+                                sharpeEl.innerText = fmtFloat2(target);
+                            } else {
+                                sharpeEl.innerText = fmtFloat2(0);
+                            }
+                        }
+
+                        if(skewEl){
+                            const raw = skewEl.innerText.replace(/[^0-9.]/g,'');
+                            const target = parseFloat(raw) || 0;
+                            skewEl.classList.add('count','count-observe');
+                            skewEl.dataset.target = String(target);
+                            skewEl.dataset.duration = '3500';
+                            if(prefersReduced){
+                                skewEl.innerText = fmtPctBull(target);
+                            } else {
+                                skewEl.innerText = fmtPctBull(0);
+                            }
+                        }
+                }catch(e){ /* ignore parse errors */ }
+
+            // Reveal/fade in hero header and paragraph with a small stagger
+            const heroTitle = document.querySelector('.hero-section h1');
+            const heroPara = document.querySelector('.hero-section p');
+            if(!prefersReduced){
+                [heroTitle, heroPara].forEach((el, i) => {
+                    if(!el) return;
+                    el.classList.add('reveal');
+                    setTimeout(()=> el.classList.add('visible'), 180 + i*160);
+                });
+            } else {
+                if(heroTitle) heroTitle.classList.add('visible');
+                if(heroPara) heroPara.classList.add('visible');
+            }
+
+            // Backtesting metrics (large numbers in the Backtesting section) - prepare for intersection-triggered count-up
+            try{
+                const backtestEls = document.querySelectorAll('#backtesting .text-5xl.live-data');
+                if(backtestEls && backtestEls.length){
+                    backtestEls.forEach((el, idx) => {
+                        const raw = el.innerText.replace(/[^0-9.\-]/g,'');
+                        const isPct = el.innerText.indexOf('%') !== -1;
+                        const target = parseFloat(raw) || 0;
+                        el.classList.add('count','count-observe');
+                        el.dataset.target = String(target);
+                        const duration = 2600 + (idx * 200);
+                        el.dataset.duration = String(duration);
+                        el.dataset.isPct = isPct ? '1' : '0';
+                        if(prefersReduced){
+                            el.innerText = isPct ? target.toFixed(2) + '%' : target.toFixed(2);
+                        } else {
+                            el.innerText = isPct ? '0.00%' : '0.00';
+                        }
+                    });
+                }
+            }catch(e){ /* ignore parse/selection errors */ }
+
+            // IntersectionObserver: animate any element with the 'count-observe' class when it scrolls into view
+            if(!prefersReduced && 'IntersectionObserver' in window){
+                const io = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(entry => {
+                        if(!entry.isIntersecting) return;
+                        const el = entry.target;
+                        const rawTarget = el.dataset.target;
+                        if(!rawTarget) { obs.unobserve(el); return; }
+                        const target = parseFloat(rawTarget) || 0;
+                        const duration = parseInt(el.dataset.duration) || 3000;
+
+                        // Choose a formatter based on known IDs or dataset flags
+                        let fmt = v => v.toFixed(2);
+                        if(el.id === 'aum-value') fmt = fmtAum;
+                        else if(el.id === 'ytd-return') fmt = fmtPct1;
+                        else if(el.id === 'sharpe-ratio') fmt = fmtFloat2;
+                        else if(el.id === 'skew-index') fmt = fmtPctBull;
+                        else if(el.dataset.isPct === '1') fmt = v => v.toFixed(2) + '%';
+
+                        // Run the animation and stop observing
+                        animateValue(el, 0, target, duration, fmt);
+                        obs.unobserve(el);
+                    });
+                }, { threshold: 0.35 });
+
+                document.querySelectorAll('.count-observe').forEach(el => io.observe(el));
+            }
+        })();
+
+        // Team marquee: smooth, pixel-perfect continuous scroll driven by requestAnimationFrame
+        (function(){
+            const marquee = document.querySelector('.team-marquee');
+            if(!marquee) return;
+            const wrap = marquee.querySelector('.marquee-track-wrap');
+            const track = marquee.querySelector('.marquee-track');
+            if(!wrap || !track) return;
+
+            // clone track to enable seamless looping
+            const clone = track.cloneNode(true);
+            wrap.appendChild(clone);
+
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if(prefersReduced){
+                // fallback: convert to a simple responsive grid (no motion)
+                wrap.style.animation = 'none';
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6';
+                Array.from(track.children).forEach(n => grid.appendChild(n.cloneNode(true)));
+                marquee.innerHTML = '';
+                marquee.appendChild(grid);
+                return;
+            }
+
+            // We'll drive the marquee using requestAnimationFrame for pixel-perfect continuous motion.
+            // This avoids CSS animation restart jumps and gives us precise control for nudging and pausing.
+            let contentWidth = 0; // width of one track
+            let offset = 0;       // current offset in px (0..contentWidth)
+            let speed = 40;       // px per second (adjusted dynamically)
+            let rafId = null;
+            let lastTs = performance.now();
+
+            wrap.style.willChange = 'transform';
+
+            function measure(){
+                // ensure the browser has laid out images; measure scrollWidth of the original track
+                contentWidth = track.scrollWidth || track.getBoundingClientRect().width || 1;
+                // adjust speed so a full loop takes roughly `duration` seconds
+                const items = track.children.length || 1;
+                const duration = Math.max(12, Math.round(18 + items * 1.2)); // seconds for one full track to pass
+                speed = contentWidth / Math.max(1, duration);
+                // reset offset safely into [0, contentWidth)
+                offset = ((offset % contentWidth) + contentWidth) % contentWidth;
+            }
+
+            function step(ts){
+                const dt = Math.min(100, ts - lastTs); // ms, clamped
+                lastTs = ts;
+                // advance offset; wrap around using modulo arithmetic
+                offset += (speed * (dt/1000));
+                if(contentWidth > 0) offset %= contentWidth;
+                // translate negative offset so content appears to move left->right visually
+                wrap.style.transform = `translateX(-${offset}px)`;
+                rafId = requestAnimationFrame(step);
+            }
+
+            function start(){
+                cancelAnimationFrame(rafId);
+                lastTs = performance.now();
+                rafId = requestAnimationFrame(step);
+            }
+
+            function stop(){
+                if(rafId) cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+
+            // Smooth nudge implementation: animate offset by delta px over `dur` ms
+            function nudgeSmooth(delta, dur = 600){
+                stop();
+                const start = performance.now();
+                const from = offset;
+                const to = offset + delta;
+                function animate(now){
+                    const t = Math.min(1, (now - start) / dur);
+                    // easeOutQuad
+                    const eased = 1 - (1 - t) * (1 - t);
+                    offset = from + (to - from) * eased;
+                    if(contentWidth > 0) wrap.style.transform = `translateX(-${((offset % contentWidth)+contentWidth)%contentWidth}px)`;
+                    if(t < 1) requestAnimationFrame(animate);
+                    else start(); // resume continuous loop
+                }
+                requestAnimationFrame(animate);
+            }
+
+            // Wire left/right buttons to nudge
+            try{
+                const wrapperEl = marquee.closest('.team-marquee-wrapper') || document;
+                const btnLeft = (wrapperEl && wrapperEl.querySelector('.marquee-left')) || document.querySelector('.marquee-left');
+                const btnRight = (wrapperEl && wrapperEl.querySelector('.marquee-right')) || document.querySelector('.marquee-right');
+                const stepPx = () => Math.max(120, Math.round(marquee.clientWidth * 0.22));
+                if(btnLeft) btnLeft.addEventListener('click', ()=> nudgeSmooth(-stepPx()));
+                if(btnRight) btnRight.addEventListener('click', ()=> nudgeSmooth(stepPx()));
+            }catch(e){ /* non-critical */ }
+
+            // Pause/resume on hover & touch (improves UX)
+            marquee.addEventListener('mouseenter', stop);
+            marquee.addEventListener('mouseleave', start);
+            marquee.addEventListener('touchstart', stop, {passive:true});
+            marquee.addEventListener('touchend', start, {passive:true});
+
+            // Re-measure after images load and on resize
+            function reflow(){ measure(); start(); }
+            window.addEventListener('resize', reflow);
+            // also measure once the window fully loads (images/fonts settled)
+            window.addEventListener('load', reflow);
+
+            // initial measure & start (try to measure now; if images not loaded yet we'll reflow on load)
+            measure();
+            start();
+        })();
+
+        // Mobile menu toggle logic
+        (function(){
+            const toggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const iconOpen = document.getElementById('icon-open');
+            const iconClose = document.getElementById('icon-close');
+            if(!toggle || !mobileMenu) return;
+            toggle.addEventListener('click', ()=>{
+                const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                toggle.setAttribute('aria-expanded', String(!expanded));
+                mobileMenu.classList.toggle('hidden');
+                if(iconOpen && iconClose){
+                    iconOpen.classList.toggle('hidden');
+                    iconClose.classList.toggle('hidden');
+                }
+            });
+        })();
+
+        // Scroll reveal: observe elements with the `scroll-reveal` class and add `in-view` when visible
+        (function(){
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const reveals = document.querySelectorAll('.scroll-reveal');
+            if(!reveals || reveals.length === 0) return;
+
+            // If user prefers reduced motion, make things visible immediately
+            if(prefersReduced){
+                reveals.forEach(el => {
+                    el.classList.add('in-view');
+                    // also reveal immediate children for stagger support
+                    if(el.dataset.stagger) Array.from(el.children).forEach((c, i)=>{ c.style.opacity = '1'; c.style.transform = 'none'; });
+                });
+                return;
+            }
+
+            const io = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if(!entry.isIntersecting) return;
+                    const el = entry.target;
+                    // add class
+                    el.classList.add('in-view');
+
+                    // If stagger is requested, apply incremental delays to children
+                    const stagger = parseInt(el.dataset.stagger) || 0;
+                    if(stagger && el.children && el.children.length){
+                        Array.from(el.children).forEach((child, idx) => {
+                            const delay = (idx * stagger);
+                            child.style.transitionDelay = delay + 'ms';
+                            // ensure the child will animate by toggling styles
+                            child.style.opacity = '';
+                            child.style.transform = '';
+                        });
+                    }
+
+                    obs.unobserve(el);
+                });
+            }, { threshold: 0.22 });
+
+            reveals.forEach(el => io.observe(el));
+        })();
+
+            /* EmailJS integration removed per user request. */
+    </script>
+</body>
+</html>
+
